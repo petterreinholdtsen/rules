@@ -713,6 +713,17 @@
 - macro: add_shell_writing_shells_tmp
   condition: (proc.name=add-shell and fd.name=/etc/shells.tmp)
 
+# Return always_true from this macro to get warnings about the cups daemons
+# regular updates in /etc/cups/.
+- macro: cupsd_state_updates
+  condition: never_true
+
+- macro: cupsd_state_writing
+  condition: >
+    proc.name = cupsd and
+    fd.name startswith /etc/cups/ and
+    not cupsd_state_updates
+
 - macro: duply_writing_exclude_files
   condition: (proc.name=touch and proc.pcmdline startswith "bash /usr/bin/duply" and fd.name startswith "/etc/duply")
 
@@ -894,6 +905,7 @@
     and not networkmanager_writing_resolv_conf
     and not run_by_chef
     and not add_shell_writing_shells_tmp
+    and not cupsd_state_writing
     and not duply_writing_exclude_files
     and not xmlcatalog_writing_files
     and not parent_supervise_running_multilog
